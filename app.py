@@ -6,13 +6,11 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Load datasets
 package_tourism = pd.read_csv('package_tourism.csv')
 user_data = pd.read_csv('user.csv')
 tourism_rating = pd.read_csv('tourism_rating.csv')
 tourism_with_id = pd.read_csv('tourism_with_id.csv')
 
-# Preprocess data
 def preprocess_data():
     # Merge data for collaborative filtering
     merged_data = tourism_rating.merge(tourism_with_id, on='Place_Id')
@@ -48,7 +46,7 @@ def content_recommendations():
     return render_template('content_recommendations.html', searched_place=searched_place, recommendations=recommendations)
 
 def collaborative_recommendations(user_id):
-    # Collaborative Filtering logic
+    # Collaborative Filtering 
     user_ratings = merged_data.pivot_table(index='User_Id', columns='Place_Id', values='Place_Ratings')
     user_similarity = cosine_similarity(user_ratings.fillna(0))
     user_idx = user_data[user_data['User_Id'] == int(user_id)].index[0]
@@ -72,7 +70,7 @@ def collaborative_recommendations(user_id):
     return recommendations
 
 def content_based_recommendations(place_name, return_searched=False):
-    # Content-Based Filtering logic
+    # Content-Based 
     tfidf = TfidfVectorizer(stop_words='english')
     tourism_with_id['Description'] = tourism_with_id['Description'].fillna('')
     tfidf_matrix = tfidf.fit_transform(tourism_with_id['Description'])

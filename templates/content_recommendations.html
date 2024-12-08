@@ -1,36 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Head content -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recommendations - Travel Website</title>
-    <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
 </head>
 <body>
 
-<!-- header design -->
 <header class="header">
-    <!-- header content -->
 </header>
 
-<!-- Section for the searched place -->
 <section class="Culture">
     <div class="Culture-img">
-        <!-- Image for the searched place -->
         <img src="{{ url_for('static', filename='img/t3.jpg') }}" alt="pepeq">
     </div>
 
     <div class="Culture-text">
         <h5>{{ searched_place['Place_Name'] }}</h5>
         <h2>{{ searched_place['City'] }}</h2>
-        <p>Rating: {{ searched_place['Rating'] }}</p>
-        <p>Price: {{ searched_place['Price'] }}</p>
+        <p>Rating : {{ searched_place['Rating'] }}</p>
+        <p>Price : Rp. {{ searched_place['Price'] }}</p>
         <p>{{ searched_place['Description'] }}</p>
-        <a href="#" class="btn">Read More</a>
     </div>
 </section>
 
