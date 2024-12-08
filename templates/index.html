@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekomendasi Wisata</title>
+</head>
+<body>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <h1>Rekomendasi Destinasi Wisata</h1>
+    
+    <h2>Collaborative Filtering</h2>
+    <form action="/recommendation_collaborative" method="post">
+        <label for="user_id">ID Pengguna:</label>
+        <input type="text" id="user_id" name="user_id" required>
+        <button type="submit">Dapatkan Rekomendasi</button>
+    </form>
+
+    <h2>Content-Based Filtering</h2>
+    <form action="/recommendation_content" method="post">
+        <label for="place_name">Nama Tempat Wisata:</label>
+        <input type="text" id="place_name" name="place_name" required>
+        <button type="submit">Dapatkan Rekomendasi</button>
+    </form>
+
+    {% if error %}
+    <p>{{ error }}</p>
+    {% endif %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='js/script.css') }}">
+
+</body>
+</html>

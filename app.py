@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+from flask import Flask, render_template, request
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from surprise import Dataset, Reader, KNNBasic
+from surprise import SVD, Dataset, Reader
 from surprise.model_selection import train_test_split
-from surprise.accuracy import rmse, mae
+
+app = Flask(__name__)
 
 # Load datasets
 package = pd.read_csv('package_tourism.csv')
@@ -14,146 +14,118 @@ tourism = pd.read_csv('tourism_with_id.csv')
 rating = pd.read_csv('tourism_rating.csv')
 user = pd.read_csv('user.csv')
 
-# **1. Data Preprocessing**
+# Preprocess the tourism data
 def preprocess_data(tourism, rating):
-    # Drop unused columns
     tourism = tourism.drop(['Description', 'City', 'Price', 'Rating', 'Time_Minutes', 
                             'Coordinate', 'Lat', 'Long', 'Unnamed: 11', 'Unnamed: 12'], axis=1)
-    
-    # Merge rating with tourism data for enrichment
     all_tourism = pd.merge(rating, tourism, on="Place_Id", how="left")
-    
-    # Drop duplicates and handle missing values
-    all_tourism = all_tourism.drop_duplicates('Place_Id').dropna()
-    
+    all_tourism = all_tourism.drop_duplicates('Place_Id').fillna(method='ffill')
     return all_tourism
 
 all_tourism = preprocess_data(tourism, rating)
 
-# **2. Normalization**
-def normalize_ratings(df):
-    df['Place_Ratings'] = df['Place_Ratings'].astype(np.float32)
-    min_rating = df['Place_Ratings'].min()
-    max_rating = df['Place_Ratings'].max()
-    df['Normalized_Rating'] = (df['Place_Ratings'] - min_rating) / (max_rating - min_rating)
-    return df
-
-all_tourism = normalize_ratings(all_tourism)
-
-# **3. Exploratory Data Analysis**
-def eda_visualization(df):
-    # Distribusi Rating
-    plt.figure(figsize=(10, 5))
-    sns.countplot(x='Place_Ratings', data=df, palette='gist_rainbow', order=df['Place_Ratings'].value_counts().index)
-    plt.title("Distribusi Rating Tempat Wisata")
-    plt.xlabel("Rating")
-    plt.ylabel("Jumlah")
-    plt.show()
-    
-    # Distribusi Kategori
-    plt.figure(figsize=(10, 5))
-    sns.countplot(x='Category', data=df, palette='gist_rainbow', order=df['Category'].value_counts().index)
-    plt.title("Distribusi Kategori Tempat Wisata")
-    plt.xlabel("Kategori")
-    plt.ylabel("Jumlah")
-    plt.xticks(rotation=45)
-    plt.show()
-
-eda_visualization(all_tourism)
-
-# **4. Content-Based Filtering**
+# Content-based Filtering using Cosine Similarity
 def content_based_recommendations(place_name, top_n=5):
     data = all_tourism[['Place_Id', 'Place_Name', 'Category']]
-    tf = TfidfVectorizer()
-    tfidf_matrix = tf.fit_transform(data['Place_Name'])
-    
-    cosine_sim = cosine_similarity(tfidf_matrix)
+    data['combined'] = data['Place_Name'] + ' ' + data['Category']
+    tf = TfidfVectorizer(stop_words='english')
+    tfidf_matrix = tf.fit_transform(data['combined'])
+    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
     cosine_sim_df = pd.DataFrame(cosine_sim, index=data['Place_Name'], columns=data['Place_Name'])
     
-    # Get recommendations
     if place_name not in cosine_sim_df.columns:
-        print(f"Error: Place '{place_name}' not found.")
         return pd.DataFrame(columns=['Place_Id', 'Place_Name', 'Category'])
     
     similar_places = cosine_sim_df[place_name].sort_values(ascending=False)[1:top_n+1]
     recommendations = data[data['Place_Name'].isin(similar_places.index)]
     return recommendations
 
-# **5. Collaborative Filtering with KNNBasic**
-def collaborative_filtering_knn(all_tourism):
+# Collaborative Filtering using SVD (Singular Value Decomposition)
+def collaborative_filtering_svd(rating):
+    # Prepare the data for the SVD model
     reader = Reader(rating_scale=(1, 5))
-    data = Dataset.load_from_df(all_tourism[['User_Id', 'Place_Id', 'Place_Ratings']], reader)
+    data = Dataset.load_from_df(rating[['User_Id', 'Place_Id', 'Place_Ratings']], reader)
     
     # Train-test split
-    trainset, testset = train_test_split(data, test_size=0.2, random_state=42)
-    
-    # Train KNN model
-    algo = KNNBasic(k=20, sim_options={'name': 'cosine', 'user_based': True})
-    algo.fit(trainset)
-    
-    # Evaluate model
-    predictions = algo.test(testset)
-    rmse_value = rmse(predictions)
-    mae_value = mae(predictions)
-    
-    return algo, testset, {"RMSE": rmse_value, "MAE": mae_value}
+    trainset, testset = train_test_split(data, test_size=0.2)
 
-# **6. Testing Collaborative Filtering for New Users**
-def test_new_user_recommendation(model, all_tourism, user_id, top_n=10):
-    all_places = all_tourism['Place_Id'].unique()
-    places_visited = all_tourism[all_tourism['User_Id'] == user_id]['Place_Id'].unique()
-    places_not_visited = [pid for pid in all_places if pid not in places_visited]
+    # Build the SVD model
+    model = SVD()
+    model.fit(trainset)
     
-    # Predict ratings for all places not visited
-    predictions = [model.predict(user_id, place_id).est for place_id in places_not_visited]
-    recommendations = pd.DataFrame({
-        'Place_Id': places_not_visited,
-        'Predicted_Rating': predictions
-    }).sort_values(by='Predicted_Rating', ascending=False).head(top_n)
+    return model
+
+# Get recommendations for a user using SVD
+def get_collaborative_recommendations(model, user_id, top_n=5):
+    # Get all places the user has not rated
+    all_places = tourism['Place_Id'].unique()
+    rated_places = rating[rating['User_Id'] == user_id]['Place_Id'].values
+    unrated_places = [place for place in all_places if place not in rated_places]
     
-    recommendations_df = recommendations.merge(
-        all_tourism[['Place_Id', 'Place_Name', 'Category']].drop_duplicates(),
-        on='Place_Id'
-    )
-    return recommendations_df
-
-# **7. Testing Collaborative Filtering per Category**
-def test_recommendation_per_category(model, all_tourism, user_id, categories, top_n=5):
-    recommendations_by_category = {}
+    # Predict ratings for unrated places
+    predictions = [model.predict(user_id, place_id) for place_id in unrated_places]
     
-    for category in categories:
-        category_places = all_tourism[all_tourism['Category'] == category]['Place_Id'].unique()
-        predictions = [
-            model.predict(user_id, place_id).est for place_id in category_places
-        ]
-        recommendations = pd.DataFrame({
-            'Place_Id': category_places,
-            'Predicted_Rating': predictions
-        }).sort_values(by='Predicted_Rating', ascending=False).head(top_n)
-        recommendations_df = recommendations.merge(
-            all_tourism[['Place_Id', 'Place_Name', 'Category']].drop_duplicates(),
-            on='Place_Id'
-        )
-        recommendations_by_category[category] = recommendations_df
-    return recommendations_by_category
+    # Sort by predicted ratings and return top N recommendations
+    predictions.sort(key=lambda x: x.est, reverse=True)
+    top_predictions = predictions[:top_n]
+    
+    recommended_places = [pred.iid for pred in top_predictions]
+    recommended_places = tourism[tourism['Place_Id'].isin(recommended_places)]
+    
+    return recommended_places
 
-# **8. Execution**
-# Train Collaborative Filtering Model
-model_knn, testset, metrics = collaborative_filtering_knn(all_tourism)
-print(f"Collaborative Filtering Metrics - RMSE: {metrics['RMSE']:.4f}")
-print(f"Collaborative Filtering Metrics - MAE: {metrics['MAE']:.4f}")
+# Prepare city-specific recommendations
+def get_city_packages(user_id):
+    user_city = user[user['User_Id'] == user_id]['Location'].iloc[0].split(',')[0]
+    city_packages = package[package['City'].str.contains(user_city, case=False, na=False)]
+    return city_packages
 
-# Testing for a New User
-new_user_id = 9999  # Example user ID
-top_recommendations = test_new_user_recommendation(model_knn, all_tourism, new_user_id, top_n=10)
-print("\nTop 10 Recommendations for a New User:")
-print(top_recommendations)
+# Initialize Collaborative Filtering Model
+model_cf = collaborative_filtering_svd(rating)
 
-# Recommendations per Category
-categories = all_tourism['Category'].unique()
-recommendations_per_category = test_recommendation_per_category(model_knn, all_tourism, new_user_id, categories, top_n=5)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-print("\nRecommendations per Category:")
-for category, recommendations in recommendations_per_category.items():
-    print(f"\nCategory: {category}")
-    print(recommendations)
+@app.route('/recommendation', methods=['POST'])
+def recommendation():
+    try:
+        user_id = int(request.form['user_id'])
+        if user_id not in user['User_Id'].values:
+            return render_template('index.html', error="User ID tidak ditemukan. Silakan coba lagi.")
+        
+        # Collaborative Filtering recommendation
+        user_city_packages = get_city_packages(user_id)
+        
+        # Render recommendations in the HTML page
+        return render_template('recommendations.html', city_packages=user_city_packages.to_dict('records'))
+    
+    except ValueError:
+        return render_template('index.html', error="User ID harus berupa angka. Silakan coba lagi.")
+
+@app.route('/recommendation_content', methods=['POST'])
+def recommendation_content():
+    place_name = request.form['place_name']
+    
+    # Content-based filtering recommendation
+    content_recommendations = content_based_recommendations(place_name, top_n=5)
+
+    return render_template('recommendations.html', content_recommendations=content_recommendations.to_dict('records'))
+
+@app.route('/recommendation_collaborative', methods=['POST'])
+def recommendation_collaborative():
+    try:
+        user_id = int(request.form['user_id'])
+        if user_id not in user['User_Id'].values:
+            return render_template('index.html', error="User ID tidak ditemukan. Silakan coba lagi.")
+        
+        # Collaborative filtering recommendation using SVD
+        collaborative_recommendations = get_collaborative_recommendations(model_cf, user_id, top_n=5)
+        
+        return render_template('recommendations.html', collaborative_recommendations=collaborative_recommendations.to_dict('records'))
+    
+    except ValueError:
+        return render_template('index.html', error="User ID harus berupa angka. Silakan coba lagi.")
+
+if __name__ == '__main__':
+    app.run(debug=True)
