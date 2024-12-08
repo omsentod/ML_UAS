@@ -2,32 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekomendasi Wisata</title>
+    <title>Travel Website</title>
+
+    <!-- custom css link -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+
+ <!-- icon link -->
+ <link rel="stylesheet"
+ href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+ <link  href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css"
+    rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-    <h1>Rekomendasi Destinasi Wisata</h1>
+<!-- header design -->
+<header class="header">
+    <a href="#" class="logo">AYAHAB<span>Tourism</span></a>
+      
+  
+    <nav class="navbar">
+        <div id="nav-close" class="fas fa-times"></div>
+        <a href="index.html">home</a>
+        <a href="adventure.html">Adventure</a>
+        <a href="map.html">map</a>
+        <a href="products.html">Products</a>
+        <a href="about.html">about us</a>
+
+    </nav>
+
+   
+    <div class="icons">
+        <div class="row">
+            <div class="row-image">
+                <img src="{{ url_for('static', filename='img/propil.png') }}" alt="pepeq">
+            </div>      
+        </div>
+</div>
     
-    <h2>Collaborative Filtering</h2>
-    <form action="/recommendation_collaborative" method="post">
-        <label for="user_id">ID Pengguna:</label>
-        <input type="text" id="user_id" name="user_id" required>
-        <button type="submit">Dapatkan Rekomendasi</button>
-    </form>
 
-    <h2>Content-Based Filtering</h2>
-    <form action="/recommendation_content" method="post">
-        <label for="place_name">Nama Tempat Wisata:</label>
-        <input type="text" id="place_name" name="place_name" required>
-        <button type="submit">Dapatkan Rekomendasi</button>
-    </form>
+</header>
 
-    {% if error %}
-    <p>{{ error }}</p>
-    {% endif %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='js/script.css') }}">
+<!-- home section -->
+<section class="home">
+    <div class="home-text">
+        <h5>Let's</h5>
+        <h1>Planning your <br> own travel</h1>
+        <p>Indonesia, a Southeast Asian nation made up of thousands of volcanic<br> islands, is home to hundreds of ethnic groups speaking many different languages.</p>
+        <a href="#" class="btn">Book a trip</a>
+    </div>
+
+    <div class="home-vid">
+        <!-- Form for content-based filtering -->
+        <form method="POST" action="{{ url_for('content_recomendations') }}">
+            <input type="text" name="place_name" placeholder="Search for a place" required>
+            <button type="submit" class="btn">Search</button>
+        </form>
+    </div>
+</section>
+
+<!-- section hasil collaborative-->
+<section class="tour">
+    <div class="center-text">
+        <h2>Popular Places</h2>
+    </div>
+
+    <div class="tour-content">
+        {% for place in collaborative_recommendations %}
+        <div class="box">
+            <!-- Assuming you have images named after Place_Id in your static/img directory -->
+            <img src="{{ url_for('static', filename='img/' + place['Place_Id'] + '.jpg') }}" alt="">
+            <h6>{{ place['City'] }}</h6>
+            <h4>{{ place['Place_Name'] }}</h4>
+            <p>Rating: {{ place['Place_Ratings'] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+
+</section>
+<link rel="stylesheet" type="text/js" href="{{ url_for('static', filename='js/script.css') }}">
 
 </body>
 </html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations - Travel Website</title>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- header design -->
+<header class="header">
+    <!-- header content -->
+</header>
+
+<!-- Section for the searched place -->
+<section class="Culture">
+    <div class="Culture-img">
+        <!-- Image for the searched place -->
+        <img src="{{ url_for('static', filename='img/' + searched_place['Place_Id'] + '.jpg') }}" alt="">
+    </div>
+
+    <div class="Culture-text">
+        <h5>{{ searched_place['Place_Name'] }}</h5>
+        <h2>{{ searched_place['City'] }}</h2>
+        <p>Rating: {{ searched_place['Rating'] }}</p>
+        <p>Price: {{ searched_place['Price'] }}</p>
+        <p>{{ searched_place['Description'] }}</p>
+        <a href="#" class="btn">Read More</a>
+    </div>
+</section>
+
+<!-- Section for recommendations -->
+<section class="tour">
+    <div class="center-text">
+        <h2>Recommended Places</h2>
+    </div>
+
+    <div class="tour-content">
+        {% for place in recommendations %}
+        <div class="box">
+            <img src="{{ url_for('static', filename='img/' + place['Place_Id'] + '.jpg') }}" alt="">
+            <h6>{{ place['City'] }}</h6>
+            <h4>{{ place['Place_Name'] }}</h4>
+            <p>Rating: {{ place['Rating'] }}</p>
+        </div>
+        {% endfor %}
+    </div> 
+    <div class="center-btn">
+        <a href="#" class="btn">See Tours</a>
+    </div>
+</section>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='js/script.css') }}">
+
+</body>
+</html>
