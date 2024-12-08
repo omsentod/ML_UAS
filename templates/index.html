@@ -19,6 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
 </head>
 <body>
@@ -56,36 +57,35 @@
         <h5>Let's</h5>
         <h1>Planning your <br> own travel</h1>
         <p>Indonesia, a Southeast Asian nation made up of thousands of volcanic<br> islands, is home to hundreds of ethnic groups speaking many different languages.</p>
-        <a href="#" class="btn">Book a trip</a>
     </div>
 
     <div class="home-vid">
         <!-- Form for content-based filtering -->
-        <form method="POST" action="{{ url_for('content_recomendations') }}">
+        <form method="POST" action="{{ url_for('content_recommendations') }}">
             <input type="text" name="place_name" placeholder="Search for a place" required>
             <button type="submit" class="btn">Search</button>
         </form>
     </div>
 </section>
 
-<!-- section hasil collaborative-->
+<!-- Section for Collaborative Filtering Results -->
 <section class="tour">
     <div class="center-text">
         <h2>Popular Places</h2>
     </div>
 
     <div class="tour-content">
-        {% for place in collaborative_recommendations %}
+        {% for place in recommendations %}
         <div class="box">
-            <!-- Assuming you have images named after Place_Id in your static/img directory -->
-            <img src="{{ url_for('static', filename='img/' + place['Place_Id'] + '.jpg') }}" alt="">
-            <h6>{{ place['City'] }}</h6>
-            <h4>{{ place['Place_Name'] }}</h4>
-            <p>Rating: {{ place['Place_Ratings'] }}</p>
+            <img src="{{ url_for('static', filename='img/t1.jpg') }}" alt="pepeq">
+            <h4>{{ place['City'] }}</h4>
+            <h6>{{ place['Place_Name'] }}</h6>
+            <i class="fas fa-star"></i> {{ place['Rating'] }}
         </div>
         {% endfor %}
     </div>
 </section>
+
 
 
 </section>

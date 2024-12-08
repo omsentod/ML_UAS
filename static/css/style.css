@@ -237,6 +237,14 @@ section{
 
 }
 
+.home-vid input{
+   width: 50%;
+   padding: 15px;
+   margin-bottom: 15px;
+   border: 1px solid #ccc;
+   border-radius: 5px;
+}
+
 .home-text h5{
    font-size: 18px;
    font-weight: 600;
