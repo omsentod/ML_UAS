@@ -14,6 +14,7 @@
    font-family: 'Open Sans', sans-serif;
 }
 
+
 :root{
 --text-color:#fff;
 --bg-color:#000;
@@ -22,6 +23,14 @@
 --h1-font:6rem;
 --h2-font:3rem;
 --p-font:1rem;
+}
+a {
+   color: var(--text-color);
+   text-decoration: none; /* Opsional: Menghapus underline */
+}
+
+a:hover {
+   color: #ccc; /* Opsional: Warna saat dihover */
 }
 
 body{

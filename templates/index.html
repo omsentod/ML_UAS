@@ -36,6 +36,13 @@
         <a href="map.html">map</a>
         <a href="products.html">Products</a>
         <a href="about.html">about us</a>
+        {% if session.get('user_id') %}
+        <!-- Show log out if user is logged in -->
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+        <!-- Optionally show login/register if user is not logged in -->
+        <a href="{{ url_for('login') }}" class="login">Log In</a>
+    {% endif %}  <!-- Pastikan ini ada di akhir blok if -->
 
     </nav>
 
@@ -77,13 +84,15 @@
     <div class="tour-content">
         {% for place in recommendations %}
         <div class="box">
-            <img src="{{ url_for('static', filename='img/t1.jpg') }}" alt="pepeq">
-            <h4>{{ place['City'] }}</h4>
-            <h6>{{ place['Place_Name'] }}</h6>
-            <div class="layout-prices">
-                <p><i class="fas fa-star"></i> {{ place['Rating'] }}</p>
-                <p>Price: Rp.{{ place['Price'] }}</p> 
-            </div>
+            <a href="{{ url_for('content_recommendations', place_name=place['Place_Name']) }}">
+                <img src="{{ url_for('static', filename='img/t1.jpg') }}" alt="{{ place['Place_Name'] }}">
+                <h4>{{ place['City'] }}</h4>
+                <h6>{{ place['Place_Name'] }}</h6>
+                <div class="layout-prices">
+                    <p><i class="fas fa-star"></i> {{ place['Rating'] }}</p>
+                    <p>Price: Rp.{{ place['Price'] }}</p> 
+                </div>
+            </a>
         </div>
         {% endfor %}
     </div>
@@ -91,7 +100,8 @@
 
 
 
-</section>
+
+
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ancu.js') }}"></script>
 
