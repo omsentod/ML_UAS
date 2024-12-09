@@ -42,9 +42,9 @@ header{
    top: 0;
    right: 0;
    z-index: 1000;
+   height: 13vh;
    width: 100%;
-   background: transparent;
-   padding: 27px 17%;
+   background-color: transparent;
    display: flex;
    align-items: center;
    justify-content: space-between;
@@ -56,7 +56,7 @@ header{
 
 header.sticky{
    padding: 8px 17%;
-   background: black;
+   background: rgb(60, 59, 59);
    backdrop-filter: blur(35px);
 }
 
@@ -414,6 +414,18 @@ section{
    margin-top: 5rem;
 }
 
+.tour-content .layout-prices {
+  display: flex;
+  justify-content: space-between; /* Membuat jarak antara elemen awal dan akhir */
+  align-items: center; /* Vertikal sejajar */
+  flex-wrap: wrap; /* Jika konten terlalu panjang, dapat melipat ke baris baru */
+}
+
+.layout-prices i {
+  margin-right: 5px; 
+font-size: var(--p-font);
+}
+
 .box{ 
    position:relative;
 
@@ -462,6 +474,7 @@ section{
    grid-template-columns: repeat(2, 1fr);
    align-items: center;
    gap: 9rem;
+   margin-top: 15vh;
 
 }
 
@@ -492,7 +505,7 @@ section{
    font-size: var(--p-font);
    font-weight: 500;
    line-height: 30px;
-   color: #ffffffab;
+   color: #dedede;
    margin-bottom: 10px;
 
 }

@@ -10,8 +10,35 @@
 </head>
 <body>
 
+<!-- header design -->
 <header class="header">
+    <!-- Logo navigates to index -->
+    <a href="{{ url_for('index', user_id=user_id) }}" class="logo">AYAHAB<span>Tourism</span></a>
+    
+    <nav class="navbar">
+        <div id="nav-close" class="fas fa-times"></div>
+        <!-- Navbar links -->
+        <a href="{{ url_for('index', user_id=user_id) }}">home</a>
+        <a href="adventure.html">Adventure</a>
+        <a href="map.html">map</a>
+        <a href="products.html">Products</a>
+        <a href="about.html">about us</a>
+    </nav>
+
+
+
+   
+    <div class="icons">
+        <div class="row">
+            <div class="row-image">
+                <img src="{{ url_for('static', filename='img/propil.png') }}" alt="pepeq">
+            </div>      
+        </div>
+</div>
+    
+
 </header>
+
 
 <section class="Culture">
     <div class="Culture-img">
@@ -19,9 +46,10 @@
     </div>
 
     <div class="Culture-text">
+       
         <h5>{{ searched_place['Place_Name'] }}</h5>
-        <h2>{{ searched_place['City'] }}</h2>
-        <p>Rating : {{ searched_place['Rating'] }}</p>
+        <h2>{{ searched_place['City'] }}</h2>  
+        <p>Rating :  <i class="fas fa-star"></i>  {{ searched_place['Rating'] }}</p>
         <p>Price : Rp. {{ searched_place['Price'] }}</p>
         <p>{{ searched_place['Description'] }}</p>
     </div>
@@ -36,10 +64,13 @@
     <div class="tour-content">
         {% for place in recommendations %}
         <div class="box">
-            <img src="{{ url_for('static', filename='img/t2.jpg') }}" alt="pepeq">
+            <img src="{{ url_for('static', filename='img/t2.jpg') }}" alt="Place Image">
             <h4>{{ place['City'] }}</h4>
             <h6>{{ place['Place_Name'] }}</h6>
-            <i class="fas fa-star"></i> {{ place['Rating'] }}
+            <div class="layout-prices">
+                <p><i class="fas fa-star"></i> {{ place['Rating'] }}</p>
+                <p>Price: Rp.{{ place['Price'] }}</p> 
+            </div>
         </div>
         {% endfor %}
     </div> 
@@ -47,7 +78,7 @@
         <a href="#" class="btn">See Tours</a>
     </div>
 </section>
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='js/script.css') }}">
-
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ancu.js') }}"></script>
 </body>
 </html>
