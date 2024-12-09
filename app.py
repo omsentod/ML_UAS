@@ -65,7 +65,7 @@ def collaborative_recommendations(user_id):
                 similar_places.append(place['Place_Id'])
                 if len(similar_places) >= 5:
                     break
-        if len(similar_places) >= 5:
+        if len(similar_places) >= 10:
             break
 
     recommendations = tourism_with_id[tourism_with_id['Place_Id'].isin(similar_places)].to_dict(orient='records')

@@ -80,7 +80,10 @@
             <img src="{{ url_for('static', filename='img/t1.jpg') }}" alt="pepeq">
             <h4>{{ place['City'] }}</h4>
             <h6>{{ place['Place_Name'] }}</h6>
-            <i class="fas fa-star"></i> {{ place['Rating'] }}
+            <div class="layout-prices">
+                <p><i class="fas fa-star"></i> {{ place['Rating'] }}</p>
+                <p>Price: Rp.{{ place['Price'] }}</p> 
+            </div>
         </div>
         {% endfor %}
     </div>
