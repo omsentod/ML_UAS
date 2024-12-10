@@ -184,7 +184,7 @@ def hybrid_recommendations(user_id, place_name=None, return_searched=False):
         category_score = category_scores.get(place_id, 0)
         
         # Bobot lebih tinggi pada content-based filtering
-        hybrid_scores[place_id] = 0.2 * collaborative_score + 0.6 * content_score + 0.2 * category_score
+        hybrid_scores[place_id] = 0.4 * content_score + 0.4 * category_score + 0.2 * collaborative_score 
 
     # Urutkan berdasarkan hybrid score
     sorted_place_ids = sorted(hybrid_scores, key=hybrid_scores.get, reverse=True)
